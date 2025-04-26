@@ -4,34 +4,59 @@
     <meta charset="UTF-8">
     <title>Linkoverzicht</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
-        iframe {
+        table {
             width: 100%;
-            height: 100%;
-            border: none;
+            border-collapse: collapse;
+        }
+        td, th {
+            padding: 8px;
+            border: 1px solid #ccc;
+        }
+        tr:hover {
+            background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
+    <table id="sheetTable"></table>
 
-<iframe id="sheetFrame" src="https://docs.google.com/spreadsheets/u/1/d/1JJ7SnzR01MnvKyZ0N7xZh20nDJVrmndEHlxaOhscaFM/htmlembed?chrome=false&gid=174863500&headers=false&range=A1:G&single=true&widget=false"></iframe>
+    <script>
+        async function loadSheetData() {
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9ny6VCvNePuGkB1hAAHQQV0KZQoTW9gkaDC8Fz14c4X1gXXAIEJmCG5rgHDGpJ8E4AlnMJlyYV0rp/pub?gid=174863500&single=true&output=csv';
+            
+            const response = await fetch(csvUrl);
+            const data = await response.text();
 
-<script>
-    // Zodra de iframe geladen is, passen we de links aan
-    document.getElementById('sheetFrame').addEventListener('load', function() {
-        const iframe = document.getElementById('sheetFrame').contentWindow.document;
-        
-        const links = iframe.querySelectorAll('a');
-        links.forEach(link => {
-            link.setAttribute('target', '_self');
-        });
-    });
-</script>
+            const rows = data.trim().split("\n").map(row => row.split(","));
+            const table = document.getElementById('sheetTable');
 
+            rows.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement(rowIndex === 0 ? 'th' : 'td');
+                    
+                    // Check of de cel een URL bevat
+                    if (cell.startsWith('http')) {
+                        const link = document.createElement('a');
+                        link.href = cell.trim();
+                        link.textContent = "Open link"; // Tekst van de link
+                        link.target = "_self";  // Heel belangrijk: open in hetzelfde iframe
+                        td.appendChild(link);
+                    } else {
+                        td.textContent = cell;
+                    }
+
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+        }
+
+        loadSheetData();
+    </script>
 </body>
 </html>
