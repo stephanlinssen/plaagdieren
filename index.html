@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Linkoverzicht</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td, th {
+            padding: 8px;
+            border: 1px solid #ccc;
+        }
+        tr:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <table id="sheetTable"></table>
+
+    <script>
+        async function loadSheetData() {
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9ny6VCvNePuGkB1hAAHQQV0KZQoTW9gkaDC8Fz14c4X1gXXAIEJmCG5rgHDGpJ8E4AlnMJlyYV0rp/pub?gid=174863500&single=true&output=csv';
+            
+            const response = await fetch(csvUrl);
+            const data = await response.text();
+
+            const rows = data.trim().split("\n").map(row => row.split(","));
+            const table = document.getElementById('sheetTable');
+
+            rows.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement(rowIndex === 0 ? 'th' : 'td');
+                    
+                    // Check of de cel een URL bevat
+                    if (cell.startsWith('http')) {
+                        const link = document.createElement('a');
+                        link.href = cell.trim();
+                        link.textContent = "Open link"; // Tekst van de link
+                        link.target = "_self";  // Heel belangrijk: open in hetzelfde iframe
+                        td.appendChild(link);
+                    } else {
+                        td.textContent = cell;
+                    }
+
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+        }
+
+        loadSheetData();
+    </script>
+</body>
+</html>
